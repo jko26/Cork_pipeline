@@ -326,6 +326,7 @@ def main():
     parser.add_argument("--max-new-tokens", type=int, default=1500)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--only-index", type=int, default=None, help="If set, only process out{index}.png")
     args = parser.parse_args()
 
     predictions_dir = args.data_root / "predictions"
@@ -337,6 +338,9 @@ def main():
         (args.data_root / "images").glob("out*.png"),
         key=lambda p: extract_id(p) if extract_id(p) is not None else 10**9,
     )
+
+    if args.only_index is not None:
+        image_paths = [p for p in image_paths if extract_id(p) == args.only_index]
 
     print(f"Found {len(image_paths)} image(s)\n")
 

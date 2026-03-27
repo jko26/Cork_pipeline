@@ -39,6 +39,7 @@ Notes:
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
@@ -500,23 +501,34 @@ def process_one_image(
 # ============================================================
 
 def main():
-    for d in [IMAGES_DIR, ANNOTATIONS_DIR, CANVAS_DIR]:
+    ap = argparse.ArgumentParser(description="Run PaddleOCR-VL layout+OCR on out*.png frames")
+    ap.add_argument("--data-root", type=Path, default=DATA_ROOT, help="Root containing images/annotations/canvas")
+    ap.add_argument("--layout-model-dir", type=str, default=None, help="Override FINETUNED_LAYOUT_MODEL_DIR")
+    ap.add_argument("--skip-existing", action="store_true", help="Skip if annotation+canvas already exist")
+    args = ap.parse_args()
+
+    data_root = args.data_root
+    images_dir = data_root / "images"
+    annotations_dir = data_root / "annotations"
+    canvas_dir = data_root / "canvas"
+
+    for d in [images_dir, annotations_dir, canvas_dir]:
         d.mkdir(parents=True, exist_ok=True)
 
     image_paths = sorted(
-        [p for p in IMAGES_DIR.glob("out*.png")],
+        [p for p in images_dir.glob("out*.png")],
         key=lambda p: extract_numeric_suffix(p) if extract_numeric_suffix(p) is not None else -1,
     )
 
     if not image_paths:
-        raise FileNotFoundError(f"No images found in {IMAGES_DIR}")
+        raise FileNotFoundError(f"No images found in {images_dir}")
 
-    pipeline = create_vl_pipeline()
+    pipeline = create_vl_pipeline(layout_model_dir=args.layout_model_dir)
 
-    print(f"Found {len(image_paths)} image(s)")
+    print(f"Found {len(image_paths)} image(s) in {images_dir}")
     for image_path in image_paths:
         try:
-            process_one_image(pipeline, image_path)
+            process_one_image(pipeline, image_path, data_root=data_root, skip_existing=args.skip_existing)
         except Exception as e:
             print(f"[error] {image_path.name}: {e}")
 

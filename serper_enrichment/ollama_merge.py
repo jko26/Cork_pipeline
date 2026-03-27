@@ -126,8 +126,15 @@ DATE/TIME NORMALIZATION
 - Dates must be YYYY-MM-DD. Times must be HH:MM (24-hour).
 - Resolve relative or missing-year dates using CURRENT DATE: {current_date}
 - When month/day given without year, use the nearest upcoming date.
-- If too ambiguous, use NOVALUE.
 - Use normalized_by_event as a strong hint (but you may override if evidence is clearly better).
+
+CONFIDENCE GATING FOR DATE/TIME
+- If you are not confident about date/time, set date/time fields to NOVALUE.
+- Only set start_date/end_date when date evidence is explicit and event-specific in high-priority sources (tickets or official website).
+- Only set start_time/end_time when time evidence is explicit and event-specific in high-priority sources (tickets or official website).
+- Do NOT infer date/time from weak clues, generic recurring series pages, or low-priority other links.
+- When sources conflict or are ambiguous for date/time, prefer NOVALUE instead of guessing.
+- If a ticket URL contains an explicit date token, you may use it as date evidence only when it does not conflict with qwen_events or higher-priority website evidence for the same event.
 
 ADDRESS / GEOCODING RULE
 - If you can find a full street address in evidence, use it.

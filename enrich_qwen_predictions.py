@@ -171,6 +171,7 @@ def main() -> None:
     ap.add_argument("--temperature", type=float, default=0.1)
 
     ap.add_argument("--dry-run", action="store_true", help="Do not call Serper/Ollama; just show parsing.")
+    ap.add_argument("--predictions-glob", type=str, default="prediction*.json", help="Glob pattern under predictions/ to process")
 
     args = ap.parse_args()
 
@@ -178,9 +179,9 @@ def main() -> None:
     if not preds_dir.exists():
         raise FileNotFoundError(f"Predictions dir not found: {preds_dir}")
 
-    pred_paths = sorted(preds_dir.glob("prediction*.json"))
+    pred_paths = sorted(preds_dir.glob(args.predictions_glob))
     if not pred_paths:
-        raise FileNotFoundError(f"No prediction*.json found in {preds_dir}")
+        raise FileNotFoundError(f"No {args.predictions_glob} found in {preds_dir}")
 
     current_date = datetime.now().strftime("%Y-%m-%d")
     today = date.today()
